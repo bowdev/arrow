@@ -111,8 +111,10 @@ function runTest() {
             require(depFile);
         }
         console.log("Executing test: " + testFile);
-        //TODO - Why global.workingDirectory is not working here ( instead of process.cwd())
-        require(path.resolve(process.cwd(), testFile));
+        if (".feature"!=path.extname(testFile)) {
+            //TODO - Why global.workingDirectory is not working here ( instead of process.cwd())
+            require(path.resolve(process.cwd(), testFile));
+        }
         require(runner);
         waitFor(getReportStatus, onReportReady);
     };
