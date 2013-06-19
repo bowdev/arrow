@@ -384,6 +384,44 @@ YUI.add('errormanager-tests', function(Y) {
     }));
 
     suite.add(new Y.Test.Case({
+        'errorCheck() should handle unknown dimensions error': function() {
+            var dataProvider = {
+                constructor : {
+                    name : "DataProvider"
+                },
+                testDataPath : "test-descriptor.json",
+                mock : mocks,
+                logger : {
+                    error : function (message) {
+                        mocks.message = message;
+                    }
+                }
+            };
+            mocks.invokeCount = 0;
+            mocks.message = undefined;
+            em.dimensionsFile = "./config/dimensions.json";
+            msg[1005] = {
+                name : 'EDSCYCBTEST',
+                text : 'YCB Variable Replacement Failed, Please check you descriptor file.\n{0}',
+            };
+            try {
+                em.errorCheck( dataProvider, "The erroe message is unknown by error manager." );
+            }
+            catch (e) {
+                Y.Assert.areSame("exit code is 1", e.message);
+            }
+            finally {
+                Y.Assert.areSame(
+                    '1005 (EDSCYCBTEST) YCB Variable Replacement Failed, Please check you descriptor file.\n'+
+                    'The erroe message is unknown by error manager.',
+                    mocks.message
+                );                
+                Y.Assert.areSame(1, mocks.invokeCount);
+            }
+        }
+    }));
+
+    suite.add(new Y.Test.Case({
         setUp : function () {
             seleniumDriver = {
                 constructor : {
@@ -396,6 +434,15 @@ YUI.add('errormanager-tests', function(Y) {
                 callback : function (message) {
                     mocks.invokeCount = mocks.invokeCount + 1;
                     mocks.message = message;
+                },
+                webdriver : {
+                    getCurrentUrl : function () {
+                        var promise = {then: function (callback) {
+                            callback("http://test.yahoo.com");
+                            return promise;
+                        }};
+                        return promise;
+                    }
                 }
             };
             mocks.invokeCount = 0;
@@ -417,7 +464,7 @@ YUI.add('errormanager-tests', function(Y) {
             em.errorCheck( seleniumDriver, "UnknownError: TypeError: ARROW is undefined" );
 
             Y.Assert.areSame(
-                '1004 (EUNDEFTEST) ARROW is not defined on testing page \n' +
+                '1004 (EUNDEFTEST) ARROW is not defined on testing page http://test.yahoo.com\n' +
                 'Please check following:\n' +
                 '1. page is not reloaded.\n' +
                 '2. page is not switched to other page.\n' +

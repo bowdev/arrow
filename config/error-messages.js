@@ -45,6 +45,11 @@ var pathNotFound = "Path is not defined", empty = "", error = {
 			'3. page is loaded and not blank.\n' +
 			'For Arrow Usage, please refer to https://github.com/yahoo/arrow/blob/master/docs/arrow_cookbook/README.rst',
 		0 : empty
+	},
+	1005 : {
+		name : 'EDSCYCB',
+		text : 'YCB Variable Replacement Failed, Please check you descriptor file.\n{0}',
+		0 : empty
 	}
 };
 
