@@ -31,13 +31,18 @@ var libs = testSpec.libs;
 var testFile = testSpec.test;
 var coverageFlag = testSpec.coverage;
 var testParams = decodeURI(args[3]);
+var waitForExitTimeout = 1000;
 var receivedShareData = undefined;
 var waitForShareDataTimeout = 1000;
 var waitForShareDataInterval = 100;
 process.on('message', function(m) {
-    logger.debug("Received shared data.");
-    // logger.trace(JSON.stringify(m.shared));
-    receivedShareData = m.shared;
+    if (m.shared) {
+        logger.debug("Received shared data.");
+        // logger.trace(JSON.stringify(m.shared));
+        receivedShareData = m.shared;
+    } else if (m.exit) {
+        process.exit(0);
+    }
 });
 var depFiles = libs.split(",");
 var testTimeOut = testSpec.testTimeOut;
@@ -63,7 +68,7 @@ function onReportReady(result) {
                 testParams: ARROW.testParams,
                 coverage: coverage.getFinalCoverage()
             });
-            process.exit(0);
+            setTimeout(function() {process.exit(0);}, waitForExitTimeout);
         } catch (e) {
             logger.error('Failed to send test report: ' + e.message);
             process.exit(1);
