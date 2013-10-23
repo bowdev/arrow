@@ -99,7 +99,12 @@ WebDriver.prototype.manage = function(){
 
         to.prototype.setScriptTimeout = function (ms) {
             console.log("Script Timeout :" + ms);
-        }
+            return {
+                then: function (cb) {
+                    cb();
+                }
+            };
+         }
 
         to.prototype.implicitlyWait = function (ms) {
             console.log("implicitlyWait Timeout :" + ms);
@@ -155,6 +160,29 @@ WebDriver.prototype.executeScript = function (script) {
             } else {
                 cb('');
             }
+        }
+    };
+};
+
+WebDriver.prototype.executeAsyncScript = function (script) {
+    var self = this;
+    this.actions.push({ "name": "script", "value": script });
+    return {
+        then: function (cb) {
+            if (self.scriptResults.hasOwnProperty(script)) {
+                cb(self.scriptResults[script], function(){console.log("executeAsyncScript.callback is called.");});
+            } else {
+                cb('', function(){console.log("executeAsyncScript.callback is called.");});
+            }
+            return  {
+                then: function (cb, err) {
+                    if (cb) {
+                        cb();
+                    } else {
+                        err();
+                    }
+                }
+            };
         }
     };
 };

@@ -16,6 +16,9 @@ YUI.add('engine-interface-tests', function (Y, NAME) {
         global.ARROW.consoleLog = "";
     }
     if (typeof window !== "undefined") delete window;
+    if (!global.callback) {
+        global.callback = function () {};
+    }
 
     var path = require('path'),
         curDir,
