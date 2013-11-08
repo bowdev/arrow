@@ -7,6 +7,7 @@
 YUI.add('default-tests', function (Y, NAME) {
     
     var path = require('path'),
+        async = require('async'),
         arrowRoot = path.join(__dirname, '../../../..'),
         DefaultController = require(arrowRoot + '/lib/controller/default.js'),
         Arrow = require(arrowRoot + '/lib/interface/arrow'),
@@ -114,7 +115,55 @@ YUI.add('default-tests', function (Y, NAME) {
             A.isTrue(navExecuted, "nav should be executed");
         }
     }));
-    
+
+    suite.add(new Y.Test.Case({
+        setUp : function () {
+            var self = this;
+            self.mockDriverIsExecuted = false;
+            self.timeout = 100;
+            self.testWaitingTimeout = 1;
+        },
+        tearDown : function () {
+            delete this.mockDriverIsExecuted;
+            delete this.timeout;
+        },
+        'test controller timeout': function () {
+            var self = this,
+                driver = {
+                    executeTest : function (config, params, cb) {
+                        self.mockDriverIsExecuted = true;
+                        setTimeout(cb, self.timeout);
+                    }
+                },
+                dc,
+                timeouted = false;
+            dc = new DefaultController({}, {test: 'test.js', testWaitingTimeout: self.testWaitingTimeout}, driver);
+            A.isFalse(this.mockDriverIsExecuted, "Mock driver should not be executed.");
+            async.series([
+                function(cb) {
+                    console.log("run test");
+                    dc.execute(function (errMsg) {
+                        if (errMsg) {
+                            console.log(errMsg);
+                        }
+                        timeouted = (typeof errMsg !== "undefined") && (errMsg === "Waiting controller execution timeout ("+self.testWaitingTimeout+" ms).");
+                        cb();
+                    });
+                },
+                function(cb) {
+                    console.log("verify test result");
+                    A.isTrue(self.mockDriverIsExecuted, "Mock driver should be executed.");
+                    A.isTrue(timeouted, "controller should have been waiting timtouted.");
+                    cb();
+                }
+            ], function() {
+                self.resume();
+            });
+            self.wait(self.timeout, function () {
+                A.fail("Test is failed due to test timeout.");
+            });
+        }
+    }));
     Y.Test.Runner.add(suite);    
 }, '0.0.1' ,{requires:['test']});
 
