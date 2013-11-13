@@ -85,6 +85,7 @@ YUI.add('arrow-tests', function (Y, NAME) {
                     self.executed = true;
                     // callback should timeout
                     setTimeout(function () { callback("mock error message"); }, 3);                   
+                    setTimeout(function () { /*callback("mock error message");*/ }, 0);                   
                 };
             });
         },
