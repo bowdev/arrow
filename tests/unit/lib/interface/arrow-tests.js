@@ -7,6 +7,7 @@
 YUI.add('arrow-tests', function (Y, NAME) {
     
     var path = require('path'),
+        mockery = require('mockery'),
         curDir,
         arrowRoot = path.join(__dirname, '../../../..'),
         Arrow = require(arrowRoot + '/lib/interface/arrow'),
@@ -69,6 +70,59 @@ YUI.add('arrow-tests', function (Y, NAME) {
             });
             A.isTrue(executed, 'Should have executed controller with testName');
 
+        }
+    }));
+
+    suite.add(new Y.Test.Case({        
+        'setUp': function () {
+            var self = this;
+            self.executed = false;
+            curDir = process.cwd();
+            process.chdir(arrowRoot); 
+            mockery.enable();
+            mockery.registerMock(controllerNameAbsolute, function (testConfig, testParams, driver) {
+                this.execute = function(callback) {
+                    self.executed = true;
+                    // callback should timeout
+                    setTimeout(function () { /*callback("mock error message");*/ }, 0);                   
+                };
+            });
+        },
+        'tearDown': function () {
+            process.chdir(curDir); 
+            mockery.deregisterAll();
+            mockery.disable();
+            global.setTimeout = self.origSetTimeout;
+        },
+        'test controller execution timeout error with test parameter': function () {
+            var driver = new StubDriver(),
+                self = this,
+                arrow;
+
+            arrow = new Arrow();
+            arrow.runController(controllerName, {}, {param: "value", testWaitingTimeout: 1}, driver, function (errMsg, data, controller) {
+                self.resume( function () {
+                    A.areSame("Waiting controller execution timeout (1 ms).", errMsg, "Error message should be timeout error");
+                });
+            });
+
+            A.isTrue(self.executed, 'Should have executed controller');
+            self.wait();
+        },
+        'test controller execution timeout error with config': function () {
+            var driver = new StubDriver(),
+                self = this,
+                arrow;
+            
+            arrow = new Arrow();
+            arrow.runController(controllerNameAbsolute, {testWaitingTimeout: 2}, {param: "value"}, driver, function (errMsg, data, controller) {
+                self.resume( function () {
+                    A.areSame("Waiting controller execution timeout (2 ms).", errMsg);
+                });
+            });
+
+            A.isTrue(self.executed, 'Should have executed controller');
+            self.wait();
         }
     }));
     
