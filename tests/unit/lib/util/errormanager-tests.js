@@ -468,20 +468,19 @@ YUI.add('errormanager-tests', function(Y) {
             msg[1002].name = 'EREPORTEST';
             msg[1004].name = "EUNDEFTEST";
             try {
-                throw new Error("Issue with loading testing page");
+                throw new Error("ReferenceError: ARROW is not defined");
             } catch(e) {
                 callback = function (errMsg) {
                     started = true;
 
-                    Y.Assert.areSame('Error: Issue with loading testing page',errMsg);
-//                    Y.Assert.areSame(
-//                        '1004 (EUNDEFTEST) Issue with loading testing page about:blank\n' +
-//                            'Possible cause :\n' +
-//                            'The page got redirected before completing the test, this happens if your page has auto-redirects ' +
-//                            'or your tests perform some UI action resulting into page change event. Please use a custom controller for these kind of issues.\n' +
-//                            'If you are already using custom controller, please check that you are using waitForElement(s) to ensure page is ready for executing test.\n' +
-//                            'For Arrow Usage, please refer to https://github.com/yahoo/arrow/blob/master/docs/arrow_cookbook/README.rst',
-//                        errMsg);
+                    Y.Assert.areSame(
+                       '1004 (EUNDEFTEST) Issue with loading testing page about:blank\n' +
+                           'Possible cause :\n' +
+                           'The page got redirected before completing the test, this happens if your page has auto-redirects ' +
+                           'or your tests perform some UI action resulting into page change event. Please use a custom controller for these kind of issues.\n' +
+                           'If you are already using custom controller, please check that you are using waitForElement(s) to ensure page is ready for executing test.\n' +
+                           'For Arrow Usage, please refer to https://github.com/yahoo/arrow/blob/master/docs/arrow_cookbook/README.rst',
+                       errMsg);
                 };
                 started = false;
                 seleniumDriver.errorCheck(e, callback);
