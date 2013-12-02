@@ -14,6 +14,16 @@ function Driver() {
     this.reports = new DriverReportStack();
 }
 
+// Called before handing over the instance to the controller
+Driver.prototype.start = function (callback) {
+    callback(null);
+};
+
+// called after the controller is done executing all the tests
+Driver.prototype.stop = function (callback) {
+    if (callback) { callback(null); }
+};
+
 Driver.prototype.getWebDriver = function () {
     return this.webdriver;
 };

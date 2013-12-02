@@ -94,30 +94,15 @@ YUI.add('arrow-tests', function (Y, NAME) {
             mockery.disable();
             global.setTimeout = self.origSetTimeout;
         },
-        'test controller execution timeout error with test parameter': function () {
+        'test controller execution timeout error': function () {
             var driver = new StubDriver(),
                 self = this,
                 arrow;
 
             arrow = new Arrow();
-            arrow.runController(controllerName, {}, {param: "value", testWaitingTimeout: 1}, driver, function (errMsg, data, controller) {
+            arrow.runController(controllerName, {}, {param: "value", testTimeOut: 1}, driver, function (errMsg, data, controller) {
                 self.resume( function () {
                     A.areSame("Waiting controller execution timeout (1 ms).", errMsg, "Error message should be timeout error");
-                });
-            });
-
-            A.isTrue(self.executed, 'Should have executed controller');
-            self.wait();
-        },
-        'test controller execution timeout error with config': function () {
-            var driver = new StubDriver(),
-                self = this,
-                arrow;
-            
-            arrow = new Arrow();
-            arrow.runController(controllerNameAbsolute, {testWaitingTimeout: 2}, {param: "value"}, driver, function (errMsg, data, controller) {
-                self.resume( function () {
-                    A.areSame("Waiting controller execution timeout (2 ms).", errMsg);
                 });
             });
 
